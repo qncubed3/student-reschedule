@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
+// import Header from "@/components/Header";
+// import Footer from "@/components/Footer";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -27,14 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        {/* <Header/> */}
+        {children}
+        {/* <Footer/> */}
       </body>
     </html>
   );
