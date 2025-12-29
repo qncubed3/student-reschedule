@@ -5,7 +5,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <>
         <Header />
-            <div className="bg-gray-50 min-h-screen p-6">
+            <div className="bg-gray-50 min-h-screen">
                 <main>{children}</main>
             </div>
         </>
