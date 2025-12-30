@@ -1,11 +1,21 @@
 import { Suspense } from "react";
 import QuickLinkHeader from "@/components/QuickLinkHeader";
 import QuickLinkCard from "@/components/QuickLinkCard";
-
+import DateDisplay from "@/components/ui/DateDisplay";
 
 export default function DashboardPage() {
+
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto p-6">
+      <div>
+        <h4 className="text-[22px] font-bold text-[rgb(35,51,92)]">
+          Welcome back, 
+          <span> name</span>
+        </h4>
+        <div className="text-[14px] text-[rgb(112,128,153)]">
+          <DateDisplay/>
+        </div>
+      </div>
       <div className="bg-white rounded-2xl shadow-xl mt-6">
         <QuickLinkHeader/>
         {/* Cards */}
