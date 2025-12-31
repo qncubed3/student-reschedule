@@ -1,4 +1,5 @@
 import { createClient } from "../supabase/server";
+import { EnrolledSubject } from "@/types/enrolment";
 
 export async function getStudentEnrolments() {
     const supabase = await createClient();
@@ -22,7 +23,7 @@ export async function getStudentEnrolments() {
     return data
 }
 
-export async function getEnrolledSubjects() {
+export async function getEnrolledSubjects(): Promise<EnrolledSubject[]> {
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -43,6 +44,7 @@ export async function getEnrolledSubjects() {
                     phone
                 ),
                 subjects (
+                    id,
                     code,
                     name
                 )
@@ -51,8 +53,25 @@ export async function getEnrolledSubjects() {
     
     if (error) {
         console.error("Error: ", error.message)
+        return []
     }
 
-    return data
+    return data as EnrolledSubject[] ?? [];
 
+}
+
+export async function getSubjectAvailabilities(subjectId: string) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("subjects")
+        .select("*")
+        .eq("id", subjectId);
+
+    if (error) {
+        console.error("Error fetching subject availabilities:", error);
+        return;
+    }
+
+    return data;
 }
