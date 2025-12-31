@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import QuickLinkHeader from "@/components/QuickLinkHeader";
 import QuickLinkCard from "@/components/QuickLinkCard";
 import DateDisplay from "@/components/ui/DateDisplay";

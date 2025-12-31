@@ -1,9 +1,9 @@
 "use client"
 
-import type { EnrolledSubject } from "@/types/enrolment"
+import type { ClassDetails } from "@/types/enrolment"
 
 type SubjectEnrolledCardProps = {
-  enrolment: EnrolledSubject
+  enrolment: ClassDetails
   selected?: boolean
   onClick?: () => void
 }
@@ -20,8 +20,8 @@ export default function SubjectEnrolledCard({
             }`}
             onClick={onClick}
         >
-            <div className="font-bold">{enrolment?.classes?.subjects?.name}</div>
-            <div className="text-sm text-muted-foreground">{enrolment?.classes?.subjects?.code}</div>
+            <div className="font-bold">{enrolment?.subject?.name}</div>
+            <div className="text-sm text-muted-foreground">{enrolment?.subject?.code}</div>
         </div>
     )
 }

@@ -5,10 +5,10 @@ import { useState } from "react";
 import ContentSidebar from "@/components/ContentSidebar";
 import StudentEnrolmentsList from "@/app/dashboard/reschedule/_components/StudentEnrolmentsList";
 import ContentSidebarHeader from "./ContentSidebarHeader";
-import { EnrolledSubject } from "@/types/enrolment";
+import { ClassDetails } from "@/types/enrolment";
 import RescheduleMainPanel from "./RescheduleMainPanel";
 
-export default function ReschedulePageClient({ enrolmentsPromise } : { enrolmentsPromise: Promise<EnrolledSubject[]> }) {
+export default function ReschedulePageClient({ enrolmentsPromise } : { enrolmentsPromise: Promise<ClassDetails[]> }) {
     const [selectedIndex, setSelectedIndex] = useState<number|null>(null)
     return (
         <div className="flex">

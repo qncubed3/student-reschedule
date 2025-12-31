@@ -1,8 +1,8 @@
 import ReschedulePageClient from "./_components/ReschedulePageClient";
-import { getEnrolledSubjects } from "@/lib/data/students";
+import { getEnrolledClasses } from "@/lib/data/students";
 import { cache } from "react";
 
-const getEnrolmentsCached = cache(getEnrolledSubjects);
+const getEnrolmentsCached = cache(getEnrolledClasses);
 
 export default function ReschedulePage() {
     const enrolmentsPromise = getEnrolmentsCached();

@@ -1,5 +1,8 @@
+"use server"
+
 import { createClient } from "../supabase/server";
-import { EnrolledSubject } from "@/types/enrolment";
+import { ClassDetails } from "@/types/enrolment";
+
 
 export async function getStudentEnrolments() {
     const supabase = await createClient();
@@ -23,7 +26,7 @@ export async function getStudentEnrolments() {
     return data
 }
 
-export async function getEnrolledSubjects(): Promise<EnrolledSubject[]> {
+export async function getEnrolledClasses(): Promise<ClassDetails[]> {
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -37,17 +40,25 @@ export async function getEnrolledSubjects(): Promise<EnrolledSubject[]> {
                 day_of_week,
                 start_time,
                 end_time,
-                tutors (
+                tutor: tutors (
                     first_name,
                     last_name,
                     email,
                     phone
                 ),
-                subjects (
+                subject: subjects (
                     id,
                     code,
                     name
-                )
+                ),
+                room: rooms (
+                    id,
+                    capacity,
+                    campus: campuses (
+                        id,
+                        name
+                    )
+                )    
             )
         `)
     
@@ -56,22 +67,48 @@ export async function getEnrolledSubjects(): Promise<EnrolledSubject[]> {
         return []
     }
 
-    return data as EnrolledSubject[] ?? [];
-
+    return data.map((enrolment) => (enrolment.classes)) as ClassDetails[];
 }
 
-export async function getSubjectAvailabilities(subjectId: string) {
+export async function getSubjectClasses(subjectId: number): Promise<ClassDetails[]> {
     const supabase = await createClient();
 
     const { data, error } = await supabase
-        .from("subjects")
-        .select("*")
-        .eq("id", subjectId);
+        .from("classes")
+        .select(`
+            name,
+            room_id,
+            class_number,
+            class_type,
+            day_of_week,
+            start_time,
+            end_time,
+            tutor: tutors (
+                first_name,
+                last_name,
+                email,
+                phone
+            ),
+            subject: subjects (
+                id,
+                code,
+                name
+            ),
+            room: rooms (
+                id,
+                capacity,
+                campus: campuses (
+                    id,
+                    name
+                )
+            )    
+        `)
+        .eq("subject_id", subjectId);
 
     if (error) {
         console.error("Error fetching subject availabilities:", error);
-        return;
+        return [];
     }
 
-    return data;
+    return data as ClassDetails[] ?? [];
 }

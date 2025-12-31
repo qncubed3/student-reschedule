@@ -2,11 +2,11 @@
 
 import { use } from "react";
 import SubjectEnrolledCard from "./SubjectEnrolledCard";
-import { EnrolledSubject } from "@/types/enrolment";
+import { ClassDetails } from "@/types/enrolment";
 
 export default function StudentEnrolmentsList(
     { enrolmentsPromise, selectedIndex, setSelectedIndex }: { 
-        enrolmentsPromise: Promise<EnrolledSubject[]>, 
+        enrolmentsPromise: Promise<ClassDetails[]>, 
         selectedIndex: number | null, 
         setSelectedIndex: React.Dispatch<React.SetStateAction<number|null>>
     }
