@@ -6,7 +6,7 @@ import ContentSidebar from "@/components/ContentSidebar";
 import StudentEnrolmentsList from "@/app/dashboard/reschedule/_components/StudentEnrolmentsList";
 import ContentSidebarHeader from "./ContentSidebarHeader";
 import { ClassDetails } from "@/types/enrolment";
-import RescheduleMainPanel from "./RescheduleMainPanel";
+import MainPanel from "./MainPanel";
 
 export default function ReschedulePageClient({ enrolmentsPromise } : { enrolmentsPromise: Promise<ClassDetails[]> }) {
     const [selectedIndex, setSelectedIndex] = useState<number|null>(null)
@@ -23,7 +23,7 @@ export default function ReschedulePageClient({ enrolmentsPromise } : { enrolment
                 </Suspense>
             </ContentSidebar>
             <Suspense fallback={<div className="flex-1 items-center justify-center h-32">Loading...</div>}>
-                <RescheduleMainPanel 
+                <MainPanel 
                     enrolmentsPromise={enrolmentsPromise}
                     selectedIndex={selectedIndex}
                 />

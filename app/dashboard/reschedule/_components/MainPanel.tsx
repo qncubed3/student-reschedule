@@ -5,7 +5,7 @@ import { getSubjectClasses } from "@/lib/data/students"
 import { ClassDetails } from "@/types/enrolment"
 import { useState, useEffect } from "react"
 
-export default function RescheduleMainPanel(
+export default function MainPanel(
     { enrolmentsPromise, selectedIndex }: {
         enrolmentsPromise: Promise<ClassDetails[]>,
         selectedIndex: number|null
@@ -27,7 +27,7 @@ export default function RescheduleMainPanel(
     useEffect(() => {
         (async () => {
             try {
-                if (subjectId == null) { // Cleaner: checks both null and undefined
+                if (subjectId == null) { 
                     setClassList([])
                 } else {
                     const newClassList = await getSubjectClasses(subjectId)
@@ -35,7 +35,7 @@ export default function RescheduleMainPanel(
                 }
             } catch (error) {
                 console.error(error)
-                setClassList([]) // Set empty array on error too
+                setClassList([])
             } finally {
                 setLoading(false)
             }

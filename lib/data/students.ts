@@ -34,7 +34,6 @@ export async function getEnrolledClasses(): Promise<ClassDetails[]> {
         .select(`
             classes (
                 name,
-                room_id,
                 class_number,
                 class_type,
                 day_of_week,
@@ -49,11 +48,13 @@ export async function getEnrolledClasses(): Promise<ClassDetails[]> {
                 subject: subjects (
                     id,
                     code,
-                    name
+                    name,
+                    color
                 ),
                 room: rooms (
                     id,
                     capacity,
+                    room_number,
                     campus: campuses (
                         id,
                         name
@@ -77,7 +78,6 @@ export async function getSubjectClasses(subjectId: number): Promise<ClassDetails
         .from("classes")
         .select(`
             name,
-            room_id,
             class_number,
             class_type,
             day_of_week,
@@ -92,11 +92,13 @@ export async function getSubjectClasses(subjectId: number): Promise<ClassDetails
             subject: subjects (
                 id,
                 code,
-                name
+                name,
+                color
             ),
             room: rooms (
                 id,
                 capacity,
+                room_number,
                 campus: campuses (
                     id,
                     name
