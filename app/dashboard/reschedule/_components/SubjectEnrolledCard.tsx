@@ -2,6 +2,9 @@
 
 import type { ClassDetails } from "@/types/enrolment"
 import { ChevronDown } from "lucide-react"
+import { useState } from "react"
+import { capitaliseFirstLetter, formatTime } from "@/app/utils/format"
+import { modifyAlpha } from "@/app/utils/style"
 
 type SubjectEnrolledCardProps = {
   enrolment: ClassDetails
@@ -9,24 +12,7 @@ type SubjectEnrolledCardProps = {
   onClick?: () => void
 }
 
-function capitaliseFirstLetter(str: string): string {
-    if (!str) return str; 
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
 
-function formatTime(timeStr: string): string {
-    // Remove any timezone if present (+11, +11:00) because JS Date may misinterpret
-    const [time] = timeStr.split(/[+-]/); // take only HH:MM:SS part
-
-    const [hourStr, minuteStr] = time.split(":");
-    let hour = parseInt(hourStr, 10);
-    const minute = minuteStr;
-
-    const ampm = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12; // convert 0 → 12
-
-    return `${hour}:${minute}${ampm}`;
-}
 
 export default function SubjectEnrolledCard({ 
     enrolment, 
@@ -35,11 +21,14 @@ export default function SubjectEnrolledCard({
 }: SubjectEnrolledCardProps) {
     const subjectCodeSplit = enrolment?.subject?.code?.split("-") ?? []
     const subjectColor = enrolment?.subject?.color
-    const subjectColorLightened = subjectColor?.replace("rgb", "rgba").replace(")", ", 0.05)")
+    const subjectColorLightened = modifyAlpha(subjectColor, 0.05)
+    const [isHover, setHover] = useState(false)
     return (
         <div
-            className={"px-6 py-4 overflow-hidden transition-colors relative shrink-0 cursor-pointer"}
+            className={"pl-6 pr-4 py-4 overflow-hidden transition-colors relative shrink-0 cursor-pointer"}
             onClick={onClick}
+            onMouseEnter={() => setHover(true)}
+            onMouseLeave={() => setHover(false)}
         >
             <div className="flex items-center justify-between">
 
@@ -64,7 +53,9 @@ export default function SubjectEnrolledCard({
                     {/* Subject title */}
 
                     <div className="flex flex-col space-y-0">
-                        <h5 className="text-[16px] font-medium text-[rgb(35,51,92)]">
+                        <h5 className={`text-[16px] text-[rgb(35,51,92)] transition-all duration-500 ${
+                            selected ? "font-semibold text-black" : "font-medium"
+                        }`}>
                             {enrolment?.subject?.name}
                         </h5>
                         <p className="text-[14px] font-normal text-[rgb(147,162,199)]">
@@ -74,17 +65,22 @@ export default function SubjectEnrolledCard({
                 </div>
 
                 {/* Chevron */}
-                <ChevronDown
-                    className={`h-5 w-5 text-[rgb(112,128,153)] transition-transform duration-200 ${
-                        selected ? "rotate-180" : "rotate-0"
-                    }`}
-                />
+                <div className={`rounded-full h-6 w-6 flex items-center justify-center translation-all duration-300 ${
+                    isHover ? "bg-gray-100" : ""
+                }`}>
+                    <ChevronDown
+                        className={`h-5 w-5 text-[rgb(112,128,153)] transition-transform duration-200 ${
+                            selected ? "rotate-180" : "rotate-0"
+                        }`}
+                    />
+                </div>
+                
 
             </div>
             {/* Expandable content */}
             <div
-                className={`overflow-hidden my-3 transition-all duration-300 ${
-                selected ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                className={`overflow-hidden transition-all duration-300 ${
+                selected ? "max-h-40 opacity-100 py-3" : "max-h-0 opacity-0"
                 }`}
             >
                 <div className="pl-[56px] py-1 text-sm text-gray-500 space-y-1">
