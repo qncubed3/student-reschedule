@@ -57,6 +57,15 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      zIndex: {
+        
+        header: "1000",
+        sidebar: "900",
+        dropdown: "800",
+        popupCard: "1100",
+        events: "600",
+        invisibleBackground: "500",
+    },
     },
   },
   plugins: [require("tailwindcss-animate")],

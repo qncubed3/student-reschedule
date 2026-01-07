@@ -1,56 +1,64 @@
 "use client"
 
-import { use } from "react"
 import { getSubjectClasses, getWeekData } from "@/lib/data/students"
-import { ClassDetails, WeekDetails } from "@/types/enrolment"
-import { useState, useEffect } from "react"
-import CalendarView from "./CalendarView"
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react"
+import { extractDays, extractMonthYear} from "@/app/utils/time"
+import { ClassDetails, WeekDetails } from "@/types/enrolment"
+import { motion, AnimatePresence } from "framer-motion"
 import { formatDate } from "@/app/utils/format"
 import { useQuery } from "@tanstack/react-query"
-import { extractDays, extractMonthYear} from "@/app/utils/time"
+import { useState } from "react"
+import { use } from "react"
 
-export default function MainPanel(
-    { enrolmentsPromise, selectedIndex }: {
-        enrolmentsPromise: Promise<ClassDetails[]>,
-        selectedIndex: number|null
-    }
-) {
+import SelectedClassCard from "./SelectedClassCard"
+import CalendarView from "./CalendarView"
 
+export default function MainPanel({ 
+    enrolmentsPromise, selectedIndex 
+}: { 
+    enrolmentsPromise: Promise<ClassDetails[]>,
+    selectedIndex: number | null
+}) {
+
+    // States
     const [isWeekDropdownOpen, setWeekDropdownOpen] = useState<boolean>(false)
     const [selectedWeek, setSelectedWeek] = useState<WeekDetails | null>(null)
-    const [weekData, setWeekData] = useState<WeekDetails[]>([])
+    const [selectedReschedule, setSelectedReschedule] = useState<ClassDetails | null>(null)
 
+    // Resolve enroments promise
     const enrolments = use(enrolmentsPromise)
     const currentEnrolment =
         selectedIndex !== null && selectedIndex !== undefined
             ? enrolments[selectedIndex]
             : null
 
+    // Get subject id for each enrolment and store in a list
     const subjectId = currentEnrolment?.subject?.id;
     const scheduledClassIds = enrolments.map(enrolments => enrolments.id)
     
     // Fetch academic week data from supabase
-    useEffect(() => {
-        (async () => {
-            try {
-                const collectedWeekData = await getWeekData()
-                setWeekData(collectedWeekData)
-                console.log(JSON.stringify(weekData, null, 4))
-            } catch (error) {
-                console.log(error)
-                setWeekData([])
-            }
-        })()
-    }, [])
+    const { 
+        data: weekData = [], 
+        isLoading: isLoadingWeeks,
+        error: weekError
+    } = useQuery({
+        queryKey: ["academicWeekData"],
+        queryFn: getWeekData,
+        staleTime: Infinity
+    })
 
-    const { data: classList = [], isLoading } = useQuery({
+    // Fetch class lists for each subject
+    const { 
+        data: classList = [], 
+        isLoading: isLoadingClasses 
+    } = useQuery({
         queryKey: ['subjectClasses', subjectId],
         queryFn: () => getSubjectClasses(subjectId!),
         enabled: subjectId != null,
         staleTime: 5 * 60 * 1000,
     });
 
+    // Move to previous week
     const handlePreviousWeek = () => {
         if (!selectedWeek || weekData.length === 0) return;
         
@@ -60,7 +68,7 @@ export default function MainPanel(
         }
     };
 
-    // Navigate to next week
+    // Move to next week
     const handleNextWeek = () => {
         if (!selectedWeek || weekData.length === 0) return;
         
@@ -83,7 +91,6 @@ export default function MainPanel(
                 <div className="bg-white rounded-2xl shadow-xl animate-in fade-in duration-300">
                     <div className="p-8">
                         <h1 className="font-bold text-[22pt] text-[rgb(35,51,92)]">Reschedule your class</h1>
-
                         {/* Controls row */}
                         <div className="flex items-center gap-4 my-4">
 
@@ -102,29 +109,52 @@ export default function MainPanel(
                                         }`}
                                     />
                                 </button>
-
-                                {isWeekDropdownOpen && (
-                                    <>
-                                        <div className="fixed inset-0 z-100" onClick={() => setWeekDropdownOpen(false)}/>
-                                        <div className="absolute left-0 mt-2 w-[19rem] bg-white border border-gray-200 rounded-xl shadow-lg z-20 max-h-80 overflow-y-auto">
-                                            {weekData.map((week) => (
-                                                <button 
-                                                    key={week.id}
-                                                    onClick={() => {
-                                                        setSelectedWeek(week);
-                                                        setWeekDropdownOpen(false);
-                                                    }}
-                                                    className={`flex justify-between w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors ${
-                                                        selectedWeek?.week_number == week.week_number ? "bg-blue-50" : 'text-gray-700'
-                                                    }`}
-                                                >
-                                                    <span className="font-medium">Week {week.week_number} </span>
-                                                    <span className="font-light text-gray-600">{formatDate(week.week_start)} - {formatDate(week.week_end)}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
+                                
+                                <AnimatePresence>
+                                    {isWeekDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-invisibleBackground" onClick={() => setWeekDropdownOpen(false)}/>
+                                            <motion.div 
+                                                className="z-dropdown absolute left-0 mt-2 w-[19rem] bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg max-h-80 overflow-y-auto"
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.2 }}
+                                            >
+                                                {isLoadingWeeks ? (
+                                                    <div className="p-4 text-gray-500">Loading weeks...</div>
+                                                ) : weekError ? (
+                                                    <div className="p-4 text-red-500">Failed to load</div>
+                                                ) : (
+                                                    weekData.map((week, index) => (
+                                                        <motion.button 
+                                                            initial={{ opacity: 0 }}
+                                                            animate={{ opacity: 1 }}
+                                                            transition={{ 
+                                                                opacity: { delay: index * 0.005, duration: 0.08 },
+                                                                backgroundColor: { duration: 0.15 }
+                                                            }}
+                                                            key={week.id}
+                                                            onClick={() => {
+                                                                setSelectedWeek(week);
+                                                                setWeekDropdownOpen(false);
+                                                            }}
+                                                            className={`flex justify-between w-full text-left px-4 py-2 ${
+                                                                selectedWeek?.week_number == week.week_number ? "bg-blue-50" : 'text-gray-700'
+                                                            }`}
+                                                            whileHover={{ 
+                                                                backgroundColor: "rgba(191, 219, 254, 0.8)",
+                                                            }}
+                                                        >
+                                                            <span className="font-medium">Week {week.week_number} </span>
+                                                            <span className="font-light text-gray-600">{formatDate(week.week_start)} - {formatDate(week.week_end)}</span>
+                                                        </motion.button>
+                                                    ))
+                                                )}
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </AnimatePresence>
                             </div>
                             <button
                                 onClick={handlePreviousWeek}
@@ -154,10 +184,16 @@ export default function MainPanel(
                             </div>
                         </div>
                         <CalendarView 
-                            classList={isLoading ? [] : classList} 
+                            classList={isLoadingClasses ? [] : classList} 
                             scheduledClassIds={scheduledClassIds} 
                             daysList={extractDays(selectedWeek)}
+                            selectedReschedule={selectedReschedule}
+                            setSelectedReschedule={setSelectedReschedule}
                         />
+                        {selectedReschedule && <SelectedClassCard
+                                classDetails={selectedReschedule}
+                            /> 
+                        }
                     </div>
                 </div>
             )}

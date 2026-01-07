@@ -6,19 +6,15 @@ import { useState } from "react"
 import { capitaliseFirstLetter, formatTime } from "@/app/utils/format"
 import { modifyAlpha } from "@/app/utils/style"
 
-type SubjectEnrolledCardProps = {
-  enrolment: ClassDetails
-  selected?: boolean
-  onClick?: () => void
-}
-
-
-
 export default function SubjectEnrolledCard({ 
     enrolment, 
     selected=false, 
     onClick 
-}: SubjectEnrolledCardProps) {
+}: {
+  enrolment: ClassDetails
+  selected?: boolean
+  onClick?: () => void
+}) {
     const subjectCodeSplit = enrolment?.subject?.code?.split("-") ?? []
     const subjectColor = enrolment?.subject?.color
     const subjectColorLightened = modifyAlpha(subjectColor, 0.05)
@@ -65,7 +61,7 @@ export default function SubjectEnrolledCard({
                 </div>
 
                 {/* Chevron */}
-                <div className={`rounded-full h-6 w-6 flex items-center justify-center translation-all duration-300 ${
+                <div className={`rounded-full h-6 w-6 flex items-center justify-center transition-all duration-300 ${
                     isHover ? "bg-gray-100" : ""
                 }`}>
                     <ChevronDown

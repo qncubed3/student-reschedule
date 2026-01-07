@@ -1,14 +1,19 @@
 "use client"
 
-import ContentSidebar from "@/components/ContentSidebar";
-import StudentEnrolmentsList from "@/app/dashboard/reschedule/_components/StudentEnrolmentsList";
-import ContentSidebarHeader from "./ContentSidebarHeader";
-import MainPanel from "./MainPanel";
 import { ClassDetails } from "@/types/enrolment";
 import { Suspense } from "react";
 import { useState } from "react";
 
-export default function ReschedulePageClient({ enrolmentsPromise } : { enrolmentsPromise: Promise<ClassDetails[]> }) {
+import StudentEnrolmentsList from "@/app/dashboard/reschedule/_components/StudentEnrolmentsList";
+import ContentSidebarHeader from "./ContentSidebarHeader";
+import ContentSidebar from "@/components/ContentSidebar";
+import MainPanel from "./MainPanel";
+
+export default function ReschedulePageClient({ 
+    enrolmentsPromise 
+}: { 
+    enrolmentsPromise: Promise<ClassDetails[]> 
+}) {
     const [selectedIndex, setSelectedIndex] = useState<number|null>(null)
     return (
         <div className="flex h-full">
@@ -28,7 +33,6 @@ export default function ReschedulePageClient({ enrolmentsPromise } : { enrolment
                     selectedIndex={selectedIndex}
                 />
             </Suspense>
-            
         </div>
     );
 }

@@ -1,33 +1,41 @@
 import type { ClassDetails } from "@/types/enrolment"
-import { getHourLabels } from "@/app/utils/time"
-import { daysOfWeekMap } from "@/app/utils/time";
-import { parseTime } from "@/app/utils/time";
+import { getTextColorForBackground } from "@/app/utils/style";
 import { motion, AnimatePresence } from "framer-motion";
 import { capitaliseFirstLetter } from "@/app/utils/format";
 import { formatTimeRange } from "@/app/utils/time";
+import { daysOfWeekMap } from "@/app/utils/time";
+import { getHourLabels } from "@/app/utils/time";
 import { modifyAlpha } from "@/app/utils/style";
-import React, { useState } from "react";
+import { parseTime } from "@/app/utils/time";
+import { useState, useEffect } from "react";
+import PopupCard from "./PopupCard";
 
-const HOUR_HEIGHT = 35;
+const HOUR_HEIGHT = 32;
 const START_TIME = 10;
 const END_TIME = 21;
 
 export default function CalendarView({ 
-    classList, scheduledClassIds, daysList
+    classList, scheduledClassIds, daysList, selectedReschedule, setSelectedReschedule
 }: { 
-    classList: ClassDetails[], scheduledClassIds: number[], daysList: number[] | null
+    classList: ClassDetails[], 
+    scheduledClassIds: number[], 
+    daysList: number[] | null,
+    selectedReschedule: ClassDetails | null,
+    setSelectedReschedule: React.Dispatch<React.SetStateAction<ClassDetails | null>>
 }) {
 
-    const [selectedClass, setSelectedClass] = useState<ClassDetails | null>(null);
+    // States
     const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
-
-    const [selectedReschedule, setSelectedReshcedule] = useState<ClassDetails | null>(null)
-
+    const [selectedClass, setSelectedClass] = useState<ClassDetails | null>(null);
+    
+    // Group list of classes by day
     const hours = getHourLabels(START_TIME, END_TIME)
     const classesByDay: Record<string, ClassDetails[]> = {}
     Object.keys(daysOfWeekMap).forEach((key) => {
         classesByDay[key] = classList.filter(c => c.day_of_week === key)
     })
+
+    // Function to compute class event position on calendar
     const getClassPosition = (classItem: ClassDetails) => {
         const startMinutes = parseTime(classItem.start_time);
         const endMinutes = parseTime(classItem.end_time);
@@ -35,6 +43,21 @@ export default function CalendarView({
         const height = ((endMinutes - startMinutes) / 60) * HOUR_HEIGHT;
         return { top, height };
     }
+
+    // Functions for popup card
+    const onClickAway = () => {
+        setSelectedClass(null);
+        setPopupPosition(null);
+    }
+    const onSelectReschedule = () => {
+        setSelectedReschedule(selectedClass)
+        setSelectedClass(null)
+    }
+
+    // Remove popup on classlist change
+    useEffect(() => {
+        setPopupPosition(null)
+    }, [classList])
 
     return (
         <div>
@@ -54,6 +77,7 @@ export default function CalendarView({
                         </div>
                     ))}
                 </div>
+
                 {/* Small space column */}
                 <div>
                     <div className="h-8 w-2"></div>
@@ -67,15 +91,20 @@ export default function CalendarView({
                         </div>
                     ))}
                 </div>
+
                 {/* Days column */}
                 <div className="flex flex-1 w-[50rem]">
                     {Object.keys(daysOfWeekMap).map((day, key) => (
                         <div key={key} className="flex-1 min-w-0">
+
+                            {/* Day and date display */}
                             <div className="h-6 flex items-center justify-center text-[rgb(68,71,70)] text-[9pt] font-medium bg-white">
                                 <h2>{daysOfWeekMap[day]}{daysList ? ` ${daysList[key]}` : ""}</h2>
                             </div>
                             <div className="h-2 border-l border-gray-200"></div>
                             <div className="relative">
+
+                                {/* Rows for each hour */}
                                 {hours.map((hour, key) => (
                                     <div 
                                         key={key}
@@ -83,6 +112,8 @@ export default function CalendarView({
                                         style={{ height: `${HOUR_HEIGHT}px`}}
                                     />
                                 ))}
+
+                                {/* Display classes for that day */}
                                 <AnimatePresence mode="sync">
                                     {classesByDay[day]?.map((classItem) => {
                                         const {top, height } = getClassPosition(classItem)
@@ -90,6 +121,7 @@ export default function CalendarView({
                                         const backgroundColor = !isScheduledClass
                                                     ? classItem.subject.color ?? "gray"
                                                     : modifyAlpha(classItem.subject.color ?? "gray", 0.5)
+                                        const textColor = getTextColorForBackground(backgroundColor as string)
                                         const isSelectedReschedule = classItem === selectedReschedule || (scheduledClassIds.includes(classItem.id) && selectedReschedule === null)
                                         return (
                                             <motion.div 
@@ -97,12 +129,12 @@ export default function CalendarView({
                                                 onClick={(e) => {
                                                     const rect = e.currentTarget.getBoundingClientRect();
                                                     setPopupPosition({
-                                                        top: rect.top,
-                                                        left: rect.left - 330
+                                                        top: rect.top - 25,
+                                                        left: rect.left - 331
                                                     });
                                                     setSelectedClass(classItem); 
                                                 }}
-                                                onDoubleClick={() => setSelectedReshcedule(classItem)}
+                                                onDoubleClick={() => setSelectedReschedule(classItem)}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ 
                                                     opacity: 1, 
@@ -114,7 +146,7 @@ export default function CalendarView({
                                                     duration: 0.3,
                                                     ease: "easeInOut"
                                                 }}
-                                                className={`absolute left-1 right-1 rounded px-1 py-0.5 text-white overflow-hidden cursor-pointer z-40 select-none ${
+                                                className={`absolute z-events left-1 right-1 rounded px-1 py-0.5 text-white overflow-hidden cursor-pointer select-none ${
                                                     isSelectedReschedule ? "outline outline-blue-500 outline-2 outline-offset-2" : ""
                                                 }`}
                                                 whileHover={{ 
@@ -136,91 +168,23 @@ export default function CalendarView({
                                                         }}
                                                     />
                                                 )}
-                                                <div className="font-medium text-[9pt]">{classItem.subject.code}</div>
-                                                <div className="text-[9pt] italic font-normal">({capitaliseFirstLetter(classItem.class_type)})</div>
-                                                <div className="text-[9pt]">{formatTimeRange(classItem.start_time, classItem.end_time)}</div>
+                                                <div className={`font-medium text-[9pt] text-${textColor}`}>{classItem.subject.code}</div>
+                                                <div className={`text-[9pt] italic font-normal text-${textColor}`}>({capitaliseFirstLetter(classItem.class_type)})</div>
+                                                <div className={`text-[9pt] text-${textColor}`}>{formatTimeRange(classItem.start_time, classItem.end_time)}</div>
                                             </motion.div>
                                         )
                                     })}
                                 </AnimatePresence>
-                            </div>
-                            
-                            
+                            </div>                            
                         </div>
                     ))}
                 </div>
-                {selectedClass && popupPosition && (
-                    <>
-                        {/* Invisible backdrop to close popup */}
-                        <div 
-                            className="fixed inset-0 z-30"
-                            onClick={() => {
-                                setSelectedClass(null);
-                                setPopupPosition(null);
-                            }}
-                        />
-                        <div
-                            className="fixed z-50 bg-white rounded-lg shadow-2xl w-80 border border-gray-200"
-                            style={{
-                                top: `${popupPosition.top}px`,
-                                left: `${popupPosition.left}px`
-                            }}
-                        >
-                            <div 
-                                className="p-4 rounded-t-lg text-white"
-                                style={{ backgroundColor: selectedClass.subject.color ?? "gray" }}
-                            >
-                                <h2 className="text-lg font-bold">{selectedClass.subject.name}</h2>
-                                <h3 className="text-md font-normal">({capitaliseFirstLetter(selectedClass.class_type)})</h3>
-                            </div>
-                            
-                            <div className="p-4 space-y-3">
-                                <div className="flex items-start">
-                                <svg className="w-5 h-5 text-gray-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <div>
-                                    <p className="font-medium">{selectedClass.day_of_week}</p>
-                                    <p className="text-sm text-gray-600">
-                                    {parseTime(selectedClass.start_time)} - {parseTime(selectedClass.end_time)}
-                                    </p>
-                                </div>
-                                </div>
-
-                                <div className="flex items-start">
-                                <svg className="w-5 h-5 text-gray-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                                <div>
-                                    <p className="font-medium">{selectedClass.tutor.first_name} {selectedClass.tutor.last_name}</p>
-                                    <p className="text-sm text-gray-600">{selectedClass.tutor.email}</p>
-                                    <p className="text-sm text-gray-600">{selectedClass.tutor.phone}</p>
-                                </div>
-                                </div>
-
-                                <div className="flex items-start">
-                                <svg className="w-5 h-5 text-gray-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <div>
-                                    <p className="font-medium">{selectedClass.room?.campus.name ?? "None"}</p>
-                                    <p className="text-sm text-gray-600">Room {selectedClass.room?.room_number ?? "None"}</p>
-                                </div>
-                                </div>
-
-                                <div className="flex items-start">
-                                <svg className="w-5 h-5 text-gray-400 mr-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                                <div>
-                                    <p className="font-medium">{selectedClass.name}</p>
-                                </div>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
+                <PopupCard 
+                    classDetails={selectedClass} 
+                    onClickAway={onClickAway}
+                    onSelectReschedule={onSelectReschedule}
+                    popupPosition={popupPosition}
+                />
             </div>
         </div>
     )
