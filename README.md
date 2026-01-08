@@ -7,13 +7,16 @@ The goal of this project is to develop an intuitive UI for students to temporari
 
 This feature is designed to centralise reschedule requests into one system, reducing service load and errors, and providing accurate data on class capacity and availabilities to students, parents and staff. 
 
-
 ## Tech Stack
 - **React** with client and server components
 - **Next.js** with App Router pattern
 - **Typescript** for type safety
 - **Tailwind CSS** and **Framer Motion** for styling and animations
+
+## Database
 - **Supabase** for database and authentication
+- **Row Level Security (RLS)** to control data access
+- **Core Tables:** Students, subjects, classes, weekly reschedules
 
 ## Installation
 1. **Clone and install dependencies**
@@ -40,11 +43,3 @@ This feature is designed to centralise reschedule requests into one system, redu
 5. **Open the application**
    
    In a web browser, enter the link [http://localhost:3000](http://localhost:3000).
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
