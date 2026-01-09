@@ -15,10 +15,10 @@ const START_TIME = 10;
 const END_TIME = 21;
 
 export default function CalendarView({ 
-    classList, scheduledClassIds, daysList, selectedReschedule, setSelectedReschedule
+    classList, scheduledClassId, daysList, selectedReschedule, setSelectedReschedule
 }: { 
     classList: ClassDetails[], 
-    scheduledClassIds: number[], 
+    scheduledClassId: number | null, 
     daysList: number[] | null,
     selectedReschedule: ClassDetails | null,
     setSelectedReschedule: React.Dispatch<React.SetStateAction<ClassDetails | null>>
@@ -117,12 +117,12 @@ export default function CalendarView({
                                 <AnimatePresence mode="sync">
                                     {classesByDay[day]?.map((classItem) => {
                                         const {top, height } = getClassPosition(classItem)
-                                        const isScheduledClass = scheduledClassIds.includes(classItem.id)
+                                        const isScheduledClass = scheduledClassId == classItem.id
                                         const backgroundColor = !isScheduledClass
                                                     ? classItem.subject.color ?? "gray"
                                                     : modifyAlpha(classItem.subject.color ?? "gray", 0.5)
                                         const textColor = getTextColorForBackground(backgroundColor as string)
-                                        const isSelectedReschedule = classItem === selectedReschedule || (scheduledClassIds.includes(classItem.id) && selectedReschedule === null)
+                                        const isSelectedReschedule = classItem === selectedReschedule || (scheduledClassId == classItem.id && selectedReschedule === null)
                                         return (
                                             <motion.div 
                                                 key={`${classItem.subject_id}-${classItem.id}`}
@@ -179,6 +179,8 @@ export default function CalendarView({
                         </div>
                     ))}
                 </div>
+
+                {/* Display popup card */}
                 <PopupCard 
                     classDetails={selectedClass} 
                     onClickAway={onClickAway}

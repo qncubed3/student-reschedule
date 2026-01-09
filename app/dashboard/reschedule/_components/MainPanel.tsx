@@ -7,7 +7,7 @@ import { ClassDetails, WeekDetails } from "@/types/enrolment"
 import { motion, AnimatePresence } from "framer-motion"
 import { formatDate } from "@/app/utils/format"
 import { useQuery } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { use } from "react"
 
 import SelectedClassCard from "./SelectedClassCard"
@@ -57,6 +57,11 @@ export default function MainPanel({
         enabled: subjectId != null,
         staleTime: 5 * 60 * 1000,
     });
+
+    // Track scheduled class
+    const scheduledClass = useMemo(() => {
+        return classList.find((classItem) => scheduledClassIds.includes(classItem.id)) ?? null
+    }, [classList, scheduledClassIds])
 
     // Move to previous week
     const handlePreviousWeek = () => {
@@ -185,15 +190,18 @@ export default function MainPanel({
                         </div>
                         <CalendarView 
                             classList={isLoadingClasses ? [] : classList} 
-                            scheduledClassIds={scheduledClassIds} 
+                            scheduledClassId={scheduledClass?.id ?? null} 
                             daysList={extractDays(selectedWeek)}
                             selectedReschedule={selectedReschedule}
                             setSelectedReschedule={setSelectedReschedule}
                         />
-                        {selectedReschedule && <SelectedClassCard
-                                classDetails={selectedReschedule}
+                        {selectedReschedule && scheduledClass && (
+                            <SelectedClassCard
+                                fromClassDetails={scheduledClass}
+                                toClassDetails={selectedReschedule}
+                                week={selectedWeek}
                             /> 
-                        }
+                        )}
                     </div>
                 </div>
             )}

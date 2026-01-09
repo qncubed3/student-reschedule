@@ -1,15 +1,16 @@
-import { ClassDetails } from "@/types/enrolment"
+import { ClassDetails, WeekDetails } from "@/types/enrolment"
 
 export default function SelectedClassCard({
-    classDetails
+    fromClassDetails, toClassDetails, week
 }: {
-    classDetails: ClassDetails
+    fromClassDetails: ClassDetails,
+    toClassDetails: ClassDetails,
+    week: WeekDetails | null
 }) {
     return (
         <div className="w-full p-4 border border-black rounded-lg">
             <div>
                 <div>
-                    {classDetails.name}
                 </div>
                 <div className="flex">
                     <div>

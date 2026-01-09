@@ -139,3 +139,38 @@ export async function getWeekData(): Promise<WeekDetails[]> {
     console.log("bruhhhh")
     return data as WeekDetails[] ?? []
 }
+
+export async function createReschedule(
+    studentId: number, 
+    academicWeekId: number,
+    fromClassId: number,
+    toClassId: number,
+    reason: string
+) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from("weekly_reschedules")
+        .insert([
+            {
+                student_id: studentId,
+                academic_week_id: academicWeekId,
+                from_class_id: fromClassId,
+                to_class_id: toClassId,
+                reason: reason,
+                status: "pending"
+            }
+        ])
+        .select();
+
+    if (error) {
+        console.error("Error creating reschedule:", error.message);
+        return { 
+            success: false, 
+            error: error.message 
+        };
+    }
+    return { 
+        success: true, 
+        data: data[0] 
+    };
+}
