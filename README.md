@@ -43,3 +43,14 @@ This feature is designed to centralise reschedule requests into one system, redu
 5. **Open the application**
    
    In a web browser, enter the link [http://localhost:3000](http://localhost:3000).
+
+## 📁 Project Structure
+
+```
+app/
+├── auth/                     
+│   └── auth.ts       
+├──                 
+├── 
+
+```
