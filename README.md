@@ -48,9 +48,11 @@ This feature is designed to centralise reschedule requests into one system, redu
 
 ```
 app/
-├── auth/                     
-│   └── auth.ts       
-├──                 
-├── 
-
+├── auth/
+├── dashboard/
+│   └── reschedule/   
+components/                     
+lib/
+supabase/
+types/   
 ```
